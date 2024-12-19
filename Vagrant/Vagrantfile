@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+
+  # config.vm.box_check_update = false
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+  # config.vm.network "private_network", ip: "192.168.33.10"
+  # config.vm.network "public_network"
+  # config.vm.synced_folder "../data", "/vagrant_data"
+  # config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  #### vm01 #####
+  config.vm.define "m01" do |m01|
+    m01.vm.box = "ubuntu/jammy64"
+    m01.vm.box_version = "20241002.0.0"
+    m01.vm.hostname = "m01"
+    m01.vm.network "private_network", ip: "192.168.73.2"
+    m01.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 2
+    end
+  end
+
+
+  #### vm02 #####
+  config.vm.define "m02" do |m02|
+    m02.vm.box = "ubuntu/jammy64"
+    m02.vm.box_version = "20241002.0.0"
+    m02.vm.hostname = "m02"
+    m02.vm.network "private_network", ip: "192.168.73.3"
+    m02.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 2
+    end
+  end
+
+
+end
