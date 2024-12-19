@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  weather_app:
+    build: .
+    ports:
+      - "5001:5001"
+    image: abdullahabaza/weather_app
