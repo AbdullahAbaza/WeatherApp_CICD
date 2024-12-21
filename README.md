@@ -27,3 +27,7 @@ cat ~/.ssh/id_ed25519_webservers_key.pub | ssh -i ~/.ssh/machines/m02/virtualbox
         //                          playbook: './Ansible/playbook.yml'
         //     }    
         // }
+
+[webservers-manual-config]
+192.168.73.2 ansible_user=vagrant ansible_private_key_file=/home/bazoo/Desktop/WeatherApp_CICD/.sshkeys/m01/private_key
+192.168.73.3 ansible_user=vagrant ansible_private_key_file=/home/bazoo/Desktop/WeatherApp_CICD/.sshkeys/m02/private_key
