@@ -44,8 +44,7 @@ pipeline {
             steps {
                 sh """
                     cd ./Ansible/
-                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory playbook.yml -v \
-                    --private-key ${env.ANSIBLE_KEY}
+                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory playbook.yml --private-key ${env.ANSIBLE_KEY} -vv
                 """
             }
         }
