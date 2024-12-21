@@ -1,5 +1,5 @@
 - name: Setup Docker And spin-up Weather_App Container
-  hosts: webservers
+  hosts: webservers-automated-config-jenkins
   become: true
   vars:
     docker_group: docker
