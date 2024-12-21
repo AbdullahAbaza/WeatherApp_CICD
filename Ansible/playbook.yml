@@ -3,8 +3,9 @@
   become: true
   vars:
     docker_group: docker
+
   tasks:
-    - name: Install Required Packages for adding Docker
+    - name: Install prerequisites for Docker
       ansible.builtin.apt:
         name:
           - apt-transport-https
@@ -14,88 +15,78 @@
         state: latest
         update_cache: true
 
+    - name: Ensure Docker keyring directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
 
-    - name: Add signing key
-      ansible.builtin.apt_key:
-        url: "https://download.docker.com/linux/{{ ansible_os_family | lower }}/gpg"
-        state: present
+    - name: Check if Docker GPG key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/docker.asc
+      register: docker_key_check
+
+    - name: Add Docker GPG key if not present
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+      when: not docker_key_check.stat.exists
 
 
-    - name: Get DEB architecture
-      shell: dpkg --print-architecture
-      register: deb_architecture
-
-
-    - name: Determine System Architecture
-      set_fact:
-        distribution: Debian
-        distribution_release: bullseye
-      when: ansible_distribution == "Kali" and ansible_distribution_release == "kali-rolling"
-    
-    
-    - name: Set default distribution values to Handle Special Distribution Cases
-      set_fact:
-        distribution: "{{ ansible_distribution }}"
-        distribution_release: "{{ ansible_distribution_release }}"
-      when: distribution is not defined and distribution_release is not defined
-    
-    
-    - name: Add repository into sources list
+    - name: Configure Docker repository
       ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }}] https://download.docker.com/linux/{{ distribution | lower }} {{ distribution_release }} stable"
+        repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         filename: docker
-    
-    
-    - name: Install Docker
+
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Docker packages
       ansible.builtin.apt:
         name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
-          - docker-compose
           - docker-compose-plugin
         state: latest
-        update_cache: true
-    
-    
-    - name: Start and enable service docker
+
+    - name: Start and enable Docker service
       ansible.builtin.service:
         name: docker
-        enabled: yes
+        enabled: true
         state: started
-    
-    
-    - name: Create docker group
-      group:
-        name: "{{ docker_group }}"
-        state: present
-    
-    
-    - name: Add user to docker group
-      user:
+
+    - name: Add user to Docker group
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
-        group: "{{ docker_group }}"
-    
-    
-    - name: Pull Docker image
-      docker_image:
+        groups: "{{ docker_group }}"
+        append: true
+
+    - name: Pull Weather_App Docker image
+      community.docker.docker_image:
         name: docker.io/abdullahabaza/weather_app
         source: pull
         tag: latest
-    
-    
-    - name: Check if Docker container is already running
-      docker_container_info:
+
+    - name: Check if Weather_App container is already running
+      community.docker.docker_container_info:
         name: weather_app
       register: container_info
-      ignore_errors: true  # Ignore errors if the container does not exist
+      ignore_errors: true
 
-    - name: Run Docker Container if not already running
-      docker_container:
+    - name: Remove existing Weather_App container if it exists
+      community.docker.docker_container:
+        name: weather_app
+        state: absent
+      when: container_info.container is not none
+
+    - name: Run Weather_App Docker container
+      community.docker.docker_container:
         name: weather_app
         image: docker.io/abdullahabaza/weather_app:latest
         state: started
         ports:
           - "5001:5001"
-      when: container_info is not defined or container_info.containers | length == 0
