@@ -58,6 +58,7 @@ pipeline {
         }
     }
     
+<<<<<<< HEAD
     // post {
     //     always {
     //         sh "rm -f ${env.ANSIBLE_KEY}" // Clean up SSH key even if the job fails
