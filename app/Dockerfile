@@ -1,5 +1,5 @@
 # stage 1: builder
-FROM python:3.10-slim-buster as builder
+FROM python:3.10-slim-buster AS builder
 
 # Set build environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -38,11 +38,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install runtime dependencies
+# In the runtime stage, after apt-get install:
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
+    python3-tk \
+    libfreetype6 \
+    libpng16-16 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN touch weather_data.db && \
+    chown appuser:appuser weather_data.db && \
+    chmod 664 weather_data.db
 
 # Copy wheels from builder and install
 COPY --from=builder /build/wheels /wheels
@@ -56,6 +64,8 @@ COPY . .
 
 # Set proper permissions
 RUN chown -R appuser:appuser /app
+RUN chmod -R 755 /app
+
 
 # Switch to non-root user
 USER appuser
@@ -66,5 +76,8 @@ EXPOSE 5001
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5001/health || exit 1
 
+# After USER appuser but before CMD
+ENV PYTHONUNBUFFERED=1
+ENV GUNICORN_CMD_ARGS="--log-level debug"
 # Use gunicorn for production
-CMD ["gunicorn", "app:app"]
+CMD ["gunicorn", "app:app", "--workers=4", "--bind=0.0.0.0:5001", "--timeout=120"]
