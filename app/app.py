@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
 from flask_caching import Cache
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_cors import CORS
 import sqlite3
 import requests
 import matplotlib.pyplot as plt
@@ -14,9 +15,14 @@ import time
 # Initialize Flask app
 app = Flask(__name__)
 
+
+# Enable CORS for all routes
+CORS(app)
+
+
 # Production configurations
 app.config.update(
-    SECRET_KEY=os.getenv('SECRET_KEY', 'your-secret-key-here'),
+    SECRET_KEY='ye)v84bfi)&z&sruo*5a0$ff*vmbh#46*)cztdlww^9(c&hl#m',
     CACHE_TYPE='simple',
     CACHE_DEFAULT_TIMEOUT=300,
     JSON_SORT_KEYS=False,
@@ -28,7 +34,7 @@ cache = Cache(app)
 
 # Database configuration
 DB_FILE = 'weather_data.db'
-API_KEY = os.getenv('OPENWEATHER_API_KEY', '603cc5249b17c63fee45270700ae6d3f')
+API_KEY = '603cc5249b17c63fee45270700ae6d3f'
 
 # Setup logging
 if not os.path.exists('logs'):
