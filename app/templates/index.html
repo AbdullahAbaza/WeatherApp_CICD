@@ -4,13 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Weather App</h1>
-    <form action="/add_city" method="POST">
-        <input type="text" name="city" placeholder="Enter city name" required>
-        <button type="submit">Add City</button>
-    </form>
-    <a href="/weather">View Weather Data</a> | <a href="/plot">View Temperature Plot</a>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-cloud-sun"></i> Weather App</h1>
+            <p>Check the weather in your favorite cities</p>
+        </header>
+
+        <form class="search-form" action="{{ url_for('add_city') }}" method="post">
+            <input type="text" name="city" class="input-field" placeholder="Enter city name..." required>
+            <button type="submit" class="button">
+                <i class="fas fa-search"></i> Add City
+            </button>
+        </form>
+
+        <div class="weather-grid">
+            <a href="{{ url_for('weather') }}" class="button">
+                <i class="fas fa-list"></i> View Weather Data
+            </a>
+            <a href="{{ url_for('plot') }}" class="button" target="_blank">
+                <i class="fas fa-chart-bar"></i> View Temperature Plot
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Add loading animation to buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.innerHTML = '<span class="loading"></span> Processing...';
+                this.disabled = true;
+            });
+        });
+    </script>
 </body>
 </html>

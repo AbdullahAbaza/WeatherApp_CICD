@@ -3,30 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Data</title>
+    <title>Weather Data - Weather App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Weather Data</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>City</th>
-                <th>Temperature (°C)</th>
-                <th>Humidity (%)</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for city, temp, hum, desc in weather_data %}
-            <tr>
-                <td>{{ city }}</td>
-                <td>{{ temp }}</td>
-                <td>{{ hum }}</td>
-                <td>{{ desc }}</td>
-            </tr>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-cloud-sun"></i> Weather Data</h1>
+            <p>Current weather information for all cities</p>
+        </header>
+
+        <div class="weather-grid">
+            {% for city, temp, humid, desc, timestamp in weather_data %}
+            <div class="weather-card">
+                <h3><i class="fas fa-map-marker-alt"></i> {{ city }}</h3>
+                <div class="weather-info">
+                    <span class="temperature">
+                        <i class="fas fa-thermometer-half"></i>
+                        {{ "%.1f"|format(temp) }}°C
+                    </span>
+                    <span class="humidity">
+                        <i class="fas fa-tint"></i>
+                        {{ humid }}% Humidity
+                    </span>
+                    <span class="description">
+                        <i class="fas fa-cloud"></i>
+                        {{ desc }}
+                    </span>
+                    <span class="timestamp">
+                        <i class="fas fa-clock"></i>
+                        {{ timestamp }}
+                    </span>
+                </div>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-    <a href="/">Back</a>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="{{ url_for('home') }}" class="button">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="{{ url_for('plot') }}" class="button" target="_blank">
+                <i class="fas fa-chart-bar"></i> View Temperature Plot
+            </a>
+        </div>
+
+        <div class="plot-container">
+            <h2><i class="fas fa-chart-line"></i> Temperature Trends</h2>
+            <img src="{{ url_for('plot') }}" alt="Temperature Plot" loading="lazy">
+        </div>
+    </div>
 </body>
 </html>
