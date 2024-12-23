@@ -1,0 +1,28 @@
+- name: Install Docker and Run the Container
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Copy install_docker.sh to the target machine
+      copy:
+        src: ./install_docker.sh # Path on the control machine
+        dest: /tmp/install_docker.sh # Path on the target machine
+    - name: Install Docker On Ubuntu
+      command: bash /tmp/install_docker.sh # Use the copied script
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+      become: true
+    - name: Pull Docker image
+      docker_image:
+        name: docker.io/abdullahabaza/weather_app
+        source: pull
+        tag: latest
+    - name: Run Docker Container
+      docker_container:
+        name: weather_app
+        image: docker.io/abdullahabaza/weather_app:latest
+        state: started
+        ports:
+          - "5001:5001"

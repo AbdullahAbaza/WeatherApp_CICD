@@ -1,0 +1,92 @@
+- name: Setup Docker And spin-up Weather_App Container
+  hosts: webservers
+  become: true
+  vars:
+    docker_group: docker
+
+  tasks:
+    - name: Install prerequisites for Docker
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - lsb-release
+          - gnupg
+        state: latest
+        update_cache: true
+
+    - name: Ensure Docker keyring directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Check if Docker GPG key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/docker.asc
+      register: docker_key_check
+
+    - name: Add Docker GPG key if not present
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+      when: not docker_key_check.stat.exists
+
+
+    - name: Configure Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: latest
+
+    - name: Start and enable Docker service
+      ansible.builtin.service:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add user to Docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: "{{ docker_group }}"
+        append: true
+
+    - name: Pull Weather_App Docker image
+      community.docker.docker_image:
+        name: docker.io/abdullahabaza/weather_app
+        source: pull
+        tag: latest
+
+    - name: Check if Weather_App container is already running
+      community.docker.docker_container_info:
+        name: weather_app
+      register: container_info
+      ignore_errors: true
+
+    - name: Remove existing Weather_App container if it exists
+      community.docker.docker_container:
+        name: weather_app
+        state: absent
+      when: container_info.container is not none
+
+    - name: Run Weather_App Docker container
+      community.docker.docker_container:
+        name: weather_app
+        image: docker.io/abdullahabaza/weather_app:latest
+        state: started
+        ports:
+          - "5001:5001"

@@ -13,6 +13,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   # config.vm.synced_folder ".", "/vagrant", disabled: true
 
+  
   #### vm01 #####
   config.vm.define "m01" do |m01|
     m01.vm.box = "ubuntu/jammy64"
