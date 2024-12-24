@@ -1,6 +1,0 @@
-services:
-  weather_app:
-    build: ./app
-    ports:
-      - "5001:5001"
-    image: abdullahabaza/weather_app:latest

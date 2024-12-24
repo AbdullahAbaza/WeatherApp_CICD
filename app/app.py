@@ -30,6 +30,9 @@ def init_db():
 def home():
     return render_template('index.html')
 
+@app.route('/health')
+def health():
+    return {'status': 'healthy'}, 200
 @app.route('/add_city', methods=['POST'])
 def add_city():
     city = request.form['city']

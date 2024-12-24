@@ -51,7 +51,7 @@ pipeline {
         //     }
         // }
         
-        stage("Run Ansible Playbook Deploy using Jenkins Plugin") {
+        stage("Run Ansible Playbook to Deploy using Jenkins Plugin") {
             steps {
                 ansiblePlaybook credentialsId: 'VMs_Shared_ppk_ID',
                                  disableHostKeyChecking: true,

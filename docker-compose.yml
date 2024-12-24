@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  weather_app:
+    build: ./app
+    image: abdullahabaza/weather_app:latest
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: weather-network
+    driver: bridge
